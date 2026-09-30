@@ -1,0 +1,1118 @@
+<!DOCTYPE html>
+<html lang="ru" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Crypto X & DexScreener Outreach Studio</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#ecfdf5',
+              400: '#34d399',
+              500: '#10b981',
+              600: '#059669',
+              accent: '#06b6d4',
+            },
+            dark: {
+              bg: '#0A0E17',
+              card: '#111827',
+              border: '#1F2937',
+              hover: '#1E293B',
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    body {
+      background: radial-gradient(circle at 50% 0%, #172554 0%, #0a0e17 50%);
+      min-height: 100vh;
+      color: #E2E8F0;
+      font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    }
+    .glow-accent {
+      box-shadow: 0 0 25px -5px rgba(16, 185, 129, 0.3);
+    }
+    .custom-scrollbar::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-track {
+      background: #0f172a;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: #334155;
+      border-radius: 4px;
+    }
+  </style>
+</head>
+<body class="custom-scrollbar">
+
+  <!-- Navigation Bar -->
+  <header class="border-b border-dark-border bg-dark-card/80 backdrop-blur sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+      <div class="flex items-center space-x-3">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-brand-600 to-brand-accent flex items-center justify-center font-black text-xl text-black shadow-lg shadow-brand-500/20">
+          ⚡
+        </div>
+        <div>
+          <span class="font-bold text-lg text-white tracking-wide">Crypto Outreach</span>
+          <span class="text-xs text-brand-400 font-mono block">X (Twitter) & DexScreener</span>
+        </div>
+      </div>
+
+      <div class="flex items-center space-x-3">
+        <button onclick="exportFile('excel')" class="px-3.5 py-1.5 rounded-lg bg-emerald-600/20 text-emerald-400 border border-emerald-500/30 hover:bg-emerald-600/30 transition text-sm flex items-center space-x-1.5 font-medium">
+          <span>📊 Экспорт Excel</span>
+        </button>
+        <button onclick="exportFile('csv')" class="px-3.5 py-1.5 rounded-lg bg-slate-800 text-slate-300 border border-slate-700 hover:bg-slate-700 transition text-sm flex items-center space-x-1.5 font-medium">
+          <span>📄 Экспорт CSV</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+
+    <!-- STEP 1: Analyze Influencer Section -->
+    <section class="bg-dark-card border border-dark-border rounded-2xl p-6 shadow-xl relative overflow-hidden">
+      <div class="absolute -right-20 -top-20 w-64 h-64 bg-brand-500/10 rounded-full blur-3xl pointer-events-none"></div>
+
+      <div class="max-w-3xl">
+        <span class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-brand-500/10 text-brand-400 border border-brand-500/20 uppercase tracking-wider">
+          Шаг 1: Анализ аккаунта коллера
+        </span>
+        <h2 class="text-2xl font-bold text-white mt-2">Выделите монеты из Twitter-аккаунта</h2>
+        <p class="text-sm text-slate-400 mt-1">
+          Введите ссылку на X-профиль (например, инфлюенсера или коллера). Система извлечет упоминаемые токены, адреса смарт-контрактов и подтянет данные с DexScreener.
+        </p>
+      </div>
+
+      <div class="mt-6 flex flex-col sm:flex-row gap-3">
+        <div class="relative flex-1">
+          <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-500 font-mono">
+            𝕏
+          </div>
+          <input
+            id="targetInput"
+            type="text"
+            value="https://x.com/rutradebtc"
+            placeholder="https://x.com/rutradebtc или @rutradebtc"
+            class="w-full pl-10 pr-4 py-3 bg-slate-900/90 border border-slate-700 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 transition font-mono text-sm"
+          >
+        </div>
+        <button
+          id="btnAnalyze"
+          onclick="analyzeInfluencer()"
+          class="px-6 py-3 bg-gradient-to-r from-brand-500 to-brand-600 hover:from-brand-400 hover:to-brand-500 text-slate-950 font-bold rounded-xl transition flex items-center justify-center space-x-2 shadow-lg shadow-brand-500/20"
+        >
+          <span id="analyzeSpinner" class="hidden animate-spin">⏳</span>
+          <span id="analyzeBtnText">Найти монеты коллера</span>
+        </button>
+      </div>
+
+      <!-- Influencer Summary Card (Hidden initially) -->
+      <div id="influencerCard" class="hidden mt-6 pt-6 border-t border-dark-border">
+        <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 bg-slate-900/60 p-4 rounded-xl border border-slate-800">
+          <div class="flex items-center space-x-4">
+            <img id="infAvatar" src="" class="w-14 h-14 rounded-full border-2 border-brand-500/40 bg-slate-800 object-cover" alt="Avatar">
+            <div>
+              <div class="flex items-center space-x-2">
+                <h3 id="infName" class="font-bold text-white text-lg"></h3>
+                <span id="infVerified" class="text-sky-400 text-xs font-semibold px-2 py-0.5 rounded bg-sky-500/10 border border-sky-500/20">Verified</span>
+              </div>
+              <p id="infHandle" class="text-sm text-brand-400 font-mono"></p>
+              <p id="infBio" class="text-xs text-slate-400 mt-1 max-w-xl"></p>
+            </div>
+          </div>
+          <div class="flex items-center space-x-6 text-center">
+            <div>
+              <div id="infFollowers" class="text-lg font-bold text-white font-mono">0</div>
+              <div class="text-xs text-slate-500 uppercase tracking-wider">Подписчики</div>
+            </div>
+            <div>
+              <div id="infTweets" class="text-lg font-bold text-white font-mono">0</div>
+              <div class="text-xs text-slate-500 uppercase tracking-wider">Всего твитов</div>
+            </div>
+            <div>
+              <div id="infCoinsCount" class="text-lg font-bold text-brand-400 font-mono">0</div>
+              <div class="text-xs text-slate-500 uppercase tracking-wider">Монет в ленте</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Promoted Coins Table -->
+        <div class="mt-6">
+          <h4 class="text-sm font-semibold uppercase tracking-wider text-slate-400 mb-3 flex items-center justify-between">
+            <span>Обнаруженные токены на DexScreener</span>
+            <span class="text-xs font-mono text-slate-500" id="coinsCountLabel"></span>
+          </h4>
+          <div class="overflow-x-auto rounded-xl border border-dark-border">
+            <table class="w-full text-left text-sm text-slate-300">
+              <thead class="bg-slate-900/90 text-xs uppercase text-slate-400 font-semibold border-b border-dark-border">
+                <tr>
+                  <th class="py-3 px-4">Токен</th>
+                  <th class="py-3 px-4">Сеть</th>
+                  <th class="py-3 px-4">Капитализация</th>
+                  <th class="py-3 px-4">Ликвидность</th>
+                  <th class="py-3 px-4">Объем 24ч</th>
+                  <th class="py-3 px-4">Пост автора / Контекст</th>
+                  <th class="py-3 px-4">Контакты дева</th>
+                  <th class="py-3 px-4 text-right">Действие</th>
+                </tr>
+              </thead>
+              <tbody id="promotedCoinsBody" class="divide-y divide-dark-border bg-slate-900/40">
+                <!-- Populated via JS -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Influencer Tweets Feed Section -->
+        <div class="mt-8 pt-6 border-t border-slate-800">
+          <div class="flex items-center justify-between mb-4">
+            <div>
+              <h4 class="text-base font-bold text-white flex items-center space-x-2">
+                <span>📝 Лента твитов автора и стиль постов</span>
+                <span id="tweetsCountBadge" class="text-xs font-mono font-normal px-2.5 py-0.5 rounded-full bg-slate-800 text-brand-400 border border-slate-700">0 твитов</span>
+              </h4>
+              <p class="text-xs text-slate-400 mt-0.5">Полный текст недавних публикаций для персонализации outreach-сообщений</p>
+            </div>
+            <button onclick="toggleTweetsFeed()" id="btnToggleTweets" class="text-xs px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 transition flex items-center space-x-1 font-medium">
+              <span id="toggleTweetsLabel">Развернуть твиты ▾</span>
+            </button>
+          </div>
+          <div id="tweetsFeedContainer" class="hidden space-y-3">
+            <!-- Populated via JS -->
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- STEP 1.5: Similar Influencers Section -->
+    <section id="similarInfluencersSection" class="bg-dark-card border border-dark-border rounded-2xl p-6 shadow-xl relative overflow-hidden">
+      <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <div>
+          <span class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 uppercase tracking-wider">
+            Рекомендации коллеров
+          </span>
+          <h2 class="text-2xl font-bold text-white mt-2">Похожие Twitter-аккаунты (Коллеры / Инфлюенсеры)</h2>
+          <p class="text-sm text-slate-400 mt-1">
+            Крипто-аккаунты с аналогичной аудиторией, схожими ключевыми словами в bio и параллельно продвигаемыми монетами.
+          </p>
+        </div>
+        <button
+          id="btnFindInfluencers"
+          onclick="findSimilarInfluencers()"
+          class="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-xl transition flex items-center space-x-2 shadow-lg shadow-indigo-500/20 text-sm"
+        >
+          <span id="infSpinner" class="hidden animate-spin">⏳</span>
+          <span id="infBtnText">👥 Найти похожие аккаунты</span>
+        </button>
+      </div>
+
+      <!-- Grid of Similar Influencers -->
+      <div id="influencersGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-6">
+        <div class="col-span-full py-8 text-center text-slate-500 font-mono text-sm">
+          Нажмите «Найти похожие аккаунты» или выполните анализ профиля выше
+        </div>
+      </div>
+    </section>
+
+    <!-- STEP 2 & 3: Similarity Search & Dev Leads -->
+    <section class="bg-dark-card border border-dark-border rounded-2xl p-6 shadow-xl relative overflow-hidden">
+      <div class="max-w-3xl">
+        <span class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 uppercase tracking-wider">
+          Шаг 2 & 3: Поиск похожих проектов и выход на девов
+        </span>
+        <h2 class="text-2xl font-bold text-white mt-2">Фильтры поиска похожих монет в DexScreener</h2>
+        <p class="text-sm text-slate-400 mt-1">
+          Параметры автоматически подстраиваются под финансовый профиль монет автора. Вы можете скорректировать сеть, капитализацию и ликвидность для поиска целевых проектов.
+        </p>
+      </div>
+
+      <!-- Filters Row -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mt-6 bg-slate-900/60 p-4 rounded-xl border border-slate-800">
+        <div>
+          <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1.5">Блокчейн / Сеть</label>
+          <select id="filterChain" class="w-full bg-slate-900 border border-slate-700 rounded-lg py-2 px-3 text-sm text-white focus:outline-none focus:border-brand-500">
+            <option value="all">Все сети (Multi-chain)</option>
+            <option value="solana">Solana</option>
+            <option value="robinhood">Robinhood Chain</option>
+            <option value="base">Base</option>
+            <option value="ethereum">Ethereum</option>
+            <option value="bsc">BSC (BNB Chain)</option>
+            <option value="arbitrum">Arbitrum</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1.5">Мин. Капа (FDV)</label>
+          <input id="filterMinFdv" type="number" value="100000" step="10000" class="w-full bg-slate-900 border border-slate-700 rounded-lg py-2 px-3 text-sm text-white focus:outline-none focus:border-brand-500">
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1.5">Макс. Капа (FDV)</label>
+          <input id="filterMaxFdv" type="number" value="20000000" step="100000" class="w-full bg-slate-900 border border-slate-700 rounded-lg py-2 px-3 text-sm text-white focus:outline-none focus:border-brand-500">
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1.5">Мин. Ликвидность</label>
+          <input id="filterMinLiq" type="number" value="20000" step="5000" class="w-full bg-slate-900 border border-slate-700 rounded-lg py-2 px-3 text-sm text-white focus:outline-none focus:border-brand-500">
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1.5">Мин. Объем 24ч</label>
+          <input id="filterMinVol" type="number" value="50000" step="10000" class="w-full bg-slate-900 border border-slate-700 rounded-lg py-2 px-3 text-sm text-white focus:outline-none focus:border-brand-500">
+        </div>
+      </div>
+
+      <div class="mt-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <label class="flex items-center space-x-2.5 text-sm text-slate-300 cursor-pointer select-none">
+          <input id="filterRequireSocials" type="checkbox" checked class="w-4 h-4 rounded bg-slate-800 border-slate-700 text-brand-500 focus:ring-brand-500 focus:ring-offset-slate-900">
+          <span>Только проекты с контактами девов (Twitter или Telegram)</span>
+        </label>
+
+        <button
+          id="btnFindSimilar"
+          onclick="findSimilarProjects()"
+          class="px-6 py-2.5 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-slate-950 font-bold rounded-xl transition flex items-center space-x-2 shadow-lg shadow-cyan-500/20"
+        >
+          <span id="findSpinner" class="hidden animate-spin">⏳</span>
+          <span id="findBtnText">🔎 Найти похожие проекты на DexScreener</span>
+        </button>
+      </div>
+
+      <!-- Discovered Projects Table -->
+      <div id="resultsSection" class="mt-8">
+        <div class="flex items-center justify-between mb-4">
+          <h3 class="text-lg font-bold text-white flex items-center space-x-2">
+            <span>Найденные проекты и контакты девов</span>
+            <span id="resultsBadge" class="text-xs font-mono font-normal px-2.5 py-0.5 rounded-full bg-slate-800 text-brand-400 border border-slate-700">0 проектов</span>
+          </h3>
+          <div class="text-xs text-slate-400">
+            Ранжировано по релевантности и торговой активности
+          </div>
+        </div>
+
+        <div class="overflow-x-auto rounded-xl border border-dark-border">
+          <table class="w-full text-left text-sm text-slate-300">
+            <thead class="bg-slate-900/90 text-xs uppercase text-slate-400 font-semibold border-b border-dark-border">
+              <tr>
+                <th class="py-3 px-4">Матч</th>
+                <th class="py-3 px-4">Проект</th>
+                <th class="py-3 px-4">Сеть</th>
+                <th class="py-3 px-4">FDV (Капа)</th>
+                <th class="py-3 px-4">Ликвидность</th>
+                <th class="py-3 px-4">Объем 24ч</th>
+                <th class="py-3 px-4">𝕏 Twitter проекта</th>
+                <th class="py-3 px-4">Telegram дева</th>
+                <th class="py-3 px-4 text-center">Статус Outreach</th>
+              </tr>
+            </thead>
+            <tbody id="similarCoinsBody" class="divide-y divide-dark-border bg-slate-900/40">
+              <tr>
+                <td colspan="9" class="py-8 text-center text-slate-500 font-mono text-sm">
+                  Нажмите кнопку «Найти похожие проекты на DexScreener» для запуска сканирования
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="border-t border-dark-border py-6 text-center text-xs text-slate-600">
+    Crypto X & DexScreener Outreach Studio • Автоматизированный подбор криптопроектов и контактов девов
+  </footer>
+
+  <script>
+    let currentInfluencerData = null;
+    let currentSimilarCoins = [];
+    let currentTweets = [];
+    let currentModalState = {
+      type: '',
+      coinSymbol: null,
+      customTweetText: null,
+      tokenAddress: null,
+      pitches: {},
+      activeTabKey: ''
+    };
+
+    function formatNumber(num) {
+      if (!num && num !== 0) return "-";
+      return "$" + Number(num).toLocaleString('en-US', { maximumFractionDigits: 0 });
+    }
+
+    function getChainBadge(chain) {
+      if (!chain) return '<span class="px-2 py-0.5 text-xs rounded bg-slate-800 text-slate-400">Unknown</span>';
+      const c = chain.toLowerCase();
+      if (c === 'solana') return '<span class="px-2 py-0.5 text-xs rounded font-medium bg-purple-500/20 text-purple-300 border border-purple-500/30">Solana</span>';
+      if (c === 'robinhood') return '<span class="px-2 py-0.5 text-xs rounded font-medium bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">Robinhood</span>';
+      if (c === 'base') return '<span class="px-2 py-0.5 text-xs rounded font-medium bg-blue-500/20 text-blue-300 border border-blue-500/30">Base</span>';
+      if (c === 'ethereum') return '<span class="px-2 py-0.5 text-xs rounded font-medium bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">Ethereum</span>';
+      if (c === 'bsc') return '<span class="px-2 py-0.5 text-xs rounded font-medium bg-amber-500/20 text-amber-300 border border-amber-500/30">BSC</span>';
+      return `<span class="px-2 py-0.5 text-xs rounded bg-slate-800 text-slate-300">${chain}</span>`;
+    }
+
+    async function analyzeInfluencer() {
+      const target = document.getElementById('targetInput').value.trim();
+      if (!target) return alert('Введите ссылку на аккаунт или @handle');
+
+      const btn = document.getElementById('btnAnalyze');
+      const spinner = document.getElementById('analyzeSpinner');
+      const btnText = document.getElementById('analyzeBtnText');
+
+      btn.disabled = true;
+      spinner.classList.remove('hidden');
+      btnText.innerText = 'Анализирую профиль и DexScreener...';
+
+      try {
+        const res = await fetch('/api/analyze-influencer', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ target: target })
+        });
+        const json = await res.json();
+        if (!json.success) throw new Error(json.detail || 'Ошибка анализа');
+
+        currentInfluencerData = json.data;
+        renderInfluencerProfile(json.data.profile, json.data.promoted_coins);
+        applyDnaFilters(json.data.influencer_dna);
+        findSimilarInfluencers();
+      } catch (e) {
+        alert('Ошибка: ' + e.message);
+      } finally {
+        btn.disabled = false;
+        spinner.classList.add('hidden');
+        btnText.innerText = 'Найти монеты коллера';
+      }
+    }
+
+    function renderInfluencerProfile(profile, coins) {
+      document.getElementById('influencerCard').classList.remove('hidden');
+      document.getElementById('infName').innerText = profile.name || profile.screen_name;
+      document.getElementById('infHandle').innerText = '@' + profile.screen_name;
+      document.getElementById('infBio').innerText = profile.bio || 'Нет описания';
+      document.getElementById('infAvatar').src = profile.avatar_url || 'https://abs.twimg.com/sticky/default_profile_images/default_profile_normal.png';
+      document.getElementById('infFollowers').innerText = (profile.followers_count || 0).toLocaleString();
+      document.getElementById('infTweets').innerText = (profile.tweets_count || 0).toLocaleString();
+      document.getElementById('infCoinsCount').innerText = coins.length;
+      document.getElementById('coinsCountLabel').innerText = `Найдено: ${coins.length}`;
+
+      const tbody = document.getElementById('promotedCoinsBody');
+      tbody.innerHTML = '';
+
+      if (coins.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="8" class="py-4 text-center text-slate-500">Монеты не обнаружены в последних твитах</td></tr>`;
+        return;
+      }
+
+      coins.forEach(coin => {
+        const tr = document.createElement('tr');
+        tr.className = 'hover:bg-slate-800/40 transition';
+
+        let socialsHtml = '<div class="flex items-center space-x-2">';
+        if (coin.twitter_url) {
+          socialsHtml += `<a href="${coin.twitter_url}" target="_blank" class="text-sky-400 hover:text-sky-300 font-mono text-xs underline">𝕏 ${coin.twitter_handle ? '@' + coin.twitter_handle : 'Twitter'}</a>`;
+        }
+        if (coin.telegram_url) {
+          socialsHtml += `<a href="${coin.telegram_url}" target="_blank" class="text-cyan-400 hover:text-cyan-300 font-mono text-xs underline">💬 TG</a>`;
+        }
+        if (!coin.twitter_url && !coin.telegram_url) {
+          socialsHtml += `<span class="text-xs text-slate-500">—</span>`;
+        }
+        socialsHtml += '</div>';
+
+        // Context / Tweet text cell
+        let contextHtml = '<span class="text-xs text-slate-500">—</span>';
+        if (coin.sample_tweet_text) {
+          const cleanSnippet = coin.sample_tweet_text.replace(/"/g, '&quot;').replace(/\n/g, ' ');
+          const shortText = cleanSnippet.length > 55 ? cleanSnippet.slice(0, 55) + '...' : cleanSnippet;
+          contextHtml = `
+            <div>
+              <p class="text-xs text-slate-300 italic font-sans truncate max-w-[200px]" title="${cleanSnippet}">"${shortText}"</p>
+              <div class="flex items-center space-x-2 mt-1">
+                <button onclick="openInfluencerPitchModal('${coin.symbol}')" class="text-xs text-brand-400 hover:text-brand-300 font-medium flex items-center space-x-0.5">
+                  <span>✉️ Составить питч</span>
+                </button>
+                ${coin.sample_tweet_url ? `<a href="${coin.sample_tweet_url}" target="_blank" class="text-[11px] text-slate-400 hover:underline">Твит ↗</a>` : ''}
+              </div>
+            </div>
+          `;
+        }
+
+        tr.innerHTML = `
+          <td class="py-3 px-4 font-bold text-white">
+            ${coin.symbol ? '$' + coin.symbol : coin.query}
+            <span class="block text-xs font-normal text-slate-400 truncate max-w-[120px]">${coin.name || ''}</span>
+          </td>
+          <td class="py-3 px-4">${getChainBadge(coin.chain_id)}</td>
+          <td class="py-3 px-4 font-mono">${formatNumber(coin.fdv)}</td>
+          <td class="py-3 px-4 font-mono text-slate-400">${formatNumber(coin.liquidity_usd)}</td>
+          <td class="py-3 px-4 font-mono text-slate-400">${formatNumber(coin.volume_24h)}</td>
+          <td class="py-3 px-4">${contextHtml}</td>
+          <td class="py-3 px-4">${socialsHtml}</td>
+          <td class="py-3 px-4 text-right">
+            <a href="${coin.dex_url}" target="_blank" class="px-2.5 py-1 rounded bg-slate-800 hover:bg-slate-700 text-xs text-slate-300 border border-slate-700 font-medium inline-block">
+              Chart ↗
+            </a>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+
+      // Render author tweets feed
+      if (currentInfluencerData && currentInfluencerData.tweets) {
+        renderTweetsFeed(currentInfluencerData.tweets);
+      }
+    }
+
+    function applyDnaFilters(dna) {
+      if (!dna) return;
+      if (dna.recommended_chain && dna.recommended_chain !== 'all') {
+        const select = document.getElementById('filterChain');
+        for (let opt of select.options) {
+          if (opt.value.toLowerCase() === dna.recommended_chain.toLowerCase()) {
+            select.value = opt.value;
+            break;
+          }
+        }
+      }
+      if (dna.min_fdv) document.getElementById('filterMinFdv').value = dna.min_fdv;
+      if (dna.max_fdv) document.getElementById('filterMaxFdv').value = dna.max_fdv;
+      if (dna.min_liquidity) document.getElementById('filterMinLiq').value = dna.min_liquidity;
+      if (dna.min_volume) document.getElementById('filterMinVol').value = dna.min_volume;
+    }
+
+    async function findSimilarProjects() {
+      const btn = document.getElementById('btnFindSimilar');
+      const spinner = document.getElementById('findSpinner');
+      const btnText = document.getElementById('findBtnText');
+
+      btn.disabled = true;
+      spinner.classList.remove('hidden');
+      btnText.innerText = 'Сканирую DexScreener...';
+
+      const payload = {
+        chain: document.getElementById('filterChain').value,
+        min_fdv: parseFloat(document.getElementById('filterMinFdv').value) || 0,
+        max_fdv: parseFloat(document.getElementById('filterMaxFdv').value) || 999999999,
+        min_liquidity: parseFloat(document.getElementById('filterMinLiq').value) || 0,
+        min_volume: parseFloat(document.getElementById('filterMinVol').value) || 0,
+        require_socials: document.getElementById('filterRequireSocials').checked,
+        source_influencer: currentInfluencerData ? currentInfluencerData.profile.screen_name : ""
+      };
+
+      try {
+        const res = await fetch('/api/find-similar', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        const json = await res.json();
+        if (!json.success) throw new Error(json.detail || 'Ошибка поиска');
+
+        renderSimilarCoins(json.data.coins);
+      } catch (e) {
+        alert('Ошибка: ' + e.message);
+      } finally {
+        btn.disabled = false;
+        spinner.classList.add('hidden');
+        btnText.innerText = '🔎 Найти похожие проекты на DexScreener';
+      }
+    }
+
+    function renderSimilarCoins(coins) {
+      currentSimilarCoins = coins;
+      const tbody = document.getElementById('similarCoinsBody');
+      tbody.innerHTML = '';
+      document.getElementById('resultsBadge').innerText = `${coins.length} проектов найдено`;
+
+      if (coins.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="9" class="py-8 text-center text-slate-500 font-mono">Ничего не найдено по заданным фильтрам. Попробуйте расширить диапазон капы или ликвидности.</td></tr>`;
+        return;
+      }
+
+      coins.forEach(coin => {
+        const tr = document.createElement('tr');
+        tr.className = 'hover:bg-slate-800/40 transition';
+
+        const matchColor = coin.similarity_score >= 80 ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30' :
+                           coin.similarity_score >= 50 ? 'bg-cyan-500/20 text-cyan-400 border-cyan-500/30' :
+                           'bg-slate-700/40 text-slate-300 border-slate-600';
+
+        let twitterCell = '<span class="text-xs text-slate-500">—</span>';
+        if (coin.twitter_url) {
+          const handle = coin.twitter_handle ? '@' + coin.twitter_handle : '𝕏 Профиль';
+          twitterCell = `
+            <div class="flex items-center space-x-2">
+              <a href="${coin.twitter_url}" target="_blank" class="px-2.5 py-1 rounded bg-sky-500/10 hover:bg-sky-500/20 text-sky-400 border border-sky-500/20 text-xs font-mono font-medium flex items-center space-x-1">
+                <span>𝕏</span> <span>${handle}</span>
+              </a>
+            </div>
+          `;
+        }
+
+        let telegramCell = '<span class="text-xs text-slate-500">—</span>';
+        if (coin.telegram_url) {
+          telegramCell = `
+            <a href="${coin.telegram_url}" target="_blank" class="px-2.5 py-1 rounded bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-400 border border-cyan-500/20 text-xs font-mono font-medium flex items-center space-x-1 inline-block">
+              <span>💬 Чат/Канал</span>
+            </a>
+          `;
+        }
+
+        tr.innerHTML = `
+          <td class="py-3 px-4">
+            <span class="px-2 py-0.5 rounded text-xs font-mono font-bold border ${matchColor}">
+              ${coin.similarity_score || 75}%
+            </span>
+          </td>
+          <td class="py-3 px-4">
+            <div class="font-bold text-white flex items-center space-x-1.5">
+              <span>$${coin.symbol}</span>
+              <a href="${coin.dex_url}" target="_blank" class="text-slate-500 hover:text-slate-300 text-xs">↗</a>
+            </div>
+            <div class="text-xs text-slate-400 truncate max-w-[140px]">${coin.name || ''}</div>
+          </td>
+          <td class="py-3 px-4">${getChainBadge(coin.chain_id)}</td>
+          <td class="py-3 px-4 font-mono font-semibold text-slate-200">${formatNumber(coin.fdv)}</td>
+          <td class="py-3 px-4 font-mono text-slate-400">${formatNumber(coin.liquidity_usd)}</td>
+          <td class="py-3 px-4 font-mono text-slate-400">${formatNumber(coin.volume_24h)}</td>
+          <td class="py-3 px-4">${twitterCell}</td>
+          <td class="py-3 px-4">${telegramCell}</td>
+          <td class="py-3 px-4 text-center">
+            <select onchange="updateStatus('${coin.token_address}', this.value)" class="w-full bg-slate-900 text-xs rounded border border-slate-700 text-slate-300 py-1 px-2 focus:outline-none focus:border-brand-500">
+              <option value="New" selected>New</option>
+              <option value="Contacted">Contacted</option>
+              <option value="Meeting">Meeting</option>
+              <option value="Closed">Deal Closed</option>
+            </select>
+            <button onclick="openDevPitchModal('${coin.token_address}')" class="mt-1.5 w-full px-2 py-1 rounded bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 text-xs font-medium transition flex items-center justify-center space-x-1">
+              <span>✉️ Питч девам</span>
+            </button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    async function updateStatus(address, status) {
+      try {
+        await fetch('/api/leads/update-status', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ token_address: address, status: status })
+        });
+      } catch (e) {
+        console.error(e);
+      }
+    }
+
+    async function findSimilarInfluencers() {
+      const target = document.getElementById('targetInput').value.trim();
+      if (!target) return alert('Введите ссылку на аккаунт или @handle');
+
+      const btn = document.getElementById('btnFindInfluencers');
+      const spinner = document.getElementById('infSpinner');
+      const btnText = document.getElementById('infBtnText');
+
+      btn.disabled = true;
+      spinner.classList.remove('hidden');
+      btnText.innerText = 'Ищу похожие аккаунты...';
+
+      try {
+        const res = await fetch('/api/find-similar-influencers', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ target: target, limit: 6 })
+        });
+        const json = await res.json();
+        if (!json.success) throw new Error(json.detail || 'Ошибка поиска');
+
+        renderSimilarInfluencers(json.influencers);
+      } catch (e) {
+        console.error('Error finding similar influencers:', e);
+      } finally {
+        btn.disabled = false;
+        spinner.classList.add('hidden');
+        btnText.innerText = '👥 Найти похожие аккаунты';
+      }
+    }
+
+    function renderSimilarInfluencers(influencers) {
+      const grid = document.getElementById('influencersGrid');
+      grid.innerHTML = '';
+
+      if (!influencers || influencers.length === 0) {
+        grid.innerHTML = '<div class="col-span-full py-8 text-center text-slate-500 font-mono text-sm">Похожие аккаунты не найдены.</div>';
+        return;
+      }
+
+      influencers.forEach(inf => {
+        const card = document.createElement('div');
+        card.className = 'bg-slate-900/80 border border-slate-800 hover:border-indigo-500/50 rounded-xl p-4 transition flex flex-col justify-between shadow-md';
+
+        let coinsHtml = '';
+        if (inf.recent_coins && inf.recent_coins.length > 0) {
+          coinsHtml = '<div class="flex flex-wrap gap-1.5 mt-3">';
+          inf.recent_coins.forEach(c => {
+            const label = c.length > 16 ? c.slice(0, 6) + '...' + c.slice(-4) : (c.startsWith('$') ? c : '$' + c);
+            coinsHtml += `<span class="px-2 py-0.5 rounded bg-slate-800 text-xs font-mono text-brand-400 border border-slate-700">${label}</span>`;
+          });
+          coinsHtml += '</div>';
+        }
+
+        card.innerHTML = `
+          <div>
+            <div class="flex items-start justify-between">
+              <div class="flex items-center space-x-3">
+                <img src="${inf.avatar_url || 'https://abs.twimg.com/sticky/default_profile_images/default_profile_normal.png'}" class="w-12 h-12 rounded-full border border-indigo-500/40 object-cover bg-slate-800">
+                <div>
+                  <h4 class="font-bold text-white text-sm flex items-center space-x-1">
+                    <span>${inf.name}</span>
+                    ${inf.is_blue_verified ? '<span class="text-sky-400 text-xs">✓</span>' : ''}
+                  </h4>
+                  <a href="${inf.url}" target="_blank" class="text-xs text-indigo-400 font-mono hover:underline">@${inf.screen_name}</a>
+                </div>
+              </div>
+              <span class="px-2 py-0.5 rounded text-xs font-mono font-bold bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
+                ${inf.similarity_score}% Матч
+              </span>
+            </div>
+
+            <p class="text-xs text-slate-400 mt-3 line-clamp-3">${inf.bio || 'Нет описания'}</p>
+            ${coinsHtml}
+          </div>
+
+          <div class="mt-4 pt-3 border-t border-slate-800/80 flex items-center justify-between text-xs">
+            <span class="text-slate-400 font-mono"><strong class="text-white">${(inf.followers_count || 0).toLocaleString()}</strong> подписчиков</span>
+            <div class="flex items-center space-x-2">
+              <button onclick="inspectAccount('${inf.screen_name}')" class="px-2.5 py-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 font-medium">
+                Анализ 🔎
+              </button>
+              <a href="${inf.url}" target="_blank" class="px-2.5 py-1 rounded bg-indigo-600/20 hover:bg-indigo-600/40 text-indigo-300 border border-indigo-500/30 font-medium">
+                𝕏 Профиль
+              </a>
+            </div>
+          </div>
+        `;
+        grid.appendChild(card);
+      });
+    }
+
+    function inspectAccount(screenName) {
+      document.getElementById('targetInput').value = 'https://x.com/' + screenName;
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      analyzeInfluencer();
+    }
+
+    function exportFile(format) {
+      window.location.href = `/api/export/${format}`;
+    }
+
+    // --- TWEETS FEED LOGIC ---
+    function toggleTweetsFeed() {
+      const feed = document.getElementById('tweetsFeedContainer');
+      const btnLabel = document.getElementById('toggleTweetsLabel');
+      if (feed.classList.contains('hidden')) {
+        feed.classList.remove('hidden');
+        btnLabel.innerText = 'Свернуть твиты ▴';
+      } else {
+        feed.classList.add('hidden');
+        btnLabel.innerText = 'Развернуть твиты ▾';
+      }
+    }
+
+    function renderTweetsFeed(tweets) {
+      currentTweets = tweets || [];
+      const container = document.getElementById('tweetsFeedContainer');
+      const countBadge = document.getElementById('tweetsCountBadge');
+      container.innerHTML = '';
+
+      if (!currentTweets || currentTweets.length === 0) {
+        countBadge.innerText = '0 твитов';
+        container.innerHTML = '<div class="p-4 rounded-xl bg-slate-900/60 border border-slate-800 text-center text-slate-500 text-xs">Твиты не найдены.</div>';
+        return;
+      }
+
+      countBadge.innerText = `${currentTweets.length} твитов`;
+
+      currentTweets.forEach((t, idx) => {
+        const card = document.createElement('div');
+        card.className = 'p-4 rounded-xl bg-slate-900/70 border border-slate-800 hover:border-slate-700 transition';
+
+        // Format cashtags and links in text
+        let formattedText = t.text || '';
+        formattedText = formattedText.replace(/(\$[A-Za-z0-9_]+)/g, '<span class="text-brand-400 font-mono font-bold">$1</span>');
+        formattedText = formattedText.replace(/(https?:\/\/[^\s]+)/g, '<a href="$1" target="_blank" class="text-sky-400 hover:underline">$1</a>');
+
+        // Cashtags badges
+        let tagsHtml = '';
+        if (t.cashtags && t.cashtags.length > 0) {
+          tagsHtml = '<div class="flex flex-wrap gap-1 mt-2.5">';
+          t.cashtags.forEach(tag => {
+            tagsHtml += `<span class="px-2 py-0.5 rounded bg-brand-500/10 text-brand-400 border border-brand-500/20 text-[11px] font-mono font-bold">${tag}</span>`;
+          });
+          tagsHtml += '</div>';
+        }
+
+        const tweetTime = t.created_at ? new Date(t.created_at).toLocaleString('ru-RU', { dateStyle: 'short', timeStyle: 'short' }) : '';
+        const authorHandle = currentInfluencerData?.profile?.screen_name || '';
+
+        card.innerHTML = `
+          <div class="flex items-start justify-between">
+            <div class="flex items-center space-x-2">
+              <span class="text-xs font-bold text-white">@${authorHandle}</span>
+              ${tweetTime ? `<span class="text-[11px] text-slate-500 font-mono">• ${tweetTime}</span>` : ''}
+            </div>
+            ${t.url ? `<a href="${t.url}" target="_blank" class="text-xs text-slate-400 hover:text-sky-400 transition flex items-center space-x-1"><span>𝕏 Твит</span> <span>↗</span></a>` : ''}
+          </div>
+
+          <p class="text-xs text-slate-200 mt-2 whitespace-pre-wrap leading-relaxed">${formattedText}</p>
+          ${tagsHtml}
+
+          <div class="mt-3 pt-2.5 border-t border-slate-800/80 flex flex-wrap items-center justify-between gap-2">
+            <div class="flex items-center space-x-4 text-[11px] text-slate-400 font-mono">
+              <span title="Просмотры">👁️ ${(t.views || 0).toLocaleString()}</span>
+              <span title="Лайки">❤️ ${(t.likes || 0).toLocaleString()}</span>
+              <span title="Ретвиты">🔁 ${(t.retweets || 0).toLocaleString()}</span>
+              <span title="Ответы">💬 ${(t.replies || 0).toLocaleString()}</span>
+            </div>
+            <button onclick="openInfluencerPitchModalForTweet(${idx})" class="px-2.5 py-1 rounded bg-brand-500/10 hover:bg-brand-500/20 text-brand-300 border border-brand-500/30 text-xs font-medium transition flex items-center space-x-1">
+              <span>✉️ Питч на основе поста</span>
+            </button>
+          </div>
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    // --- OUTREACH PITCH MODAL LOGIC ---
+    async function openInfluencerPitchModal(coinSymbol) {
+      if (!currentInfluencerData) return alert('Сначала проанализируйте профиль инфлюенсера.');
+      currentModalState.type = 'influencer';
+      currentModalState.coinSymbol = coinSymbol || null;
+      currentModalState.customTweetText = null;
+      currentModalState.tokenAddress = null;
+
+      let coin = null;
+      if (coinSymbol && currentInfluencerData.promoted_coins) {
+        coin = currentInfluencerData.promoted_coins.find(c => (c.symbol || '').toLowerCase() === coinSymbol.toLowerCase());
+      }
+
+      document.getElementById('modalTitle').innerText = `Outreach-питч для @${currentInfluencerData.profile.screen_name}`;
+      document.getElementById('modalSubtitle').innerText = coinSymbol ? `Персонализирован под колл по $${coinSymbol}` : 'Общий питч на размещение рекламы и коллов';
+      document.getElementById('modalTargetName').innerText = currentInfluencerData.profile.name || ('@' + currentInfluencerData.profile.screen_name);
+      document.getElementById('modalTargetBadge').innerText = '𝕏 Коллер';
+      document.getElementById('modalTargetAvatar').innerHTML = '📢';
+
+      let desc = `@${currentInfluencerData.profile.screen_name} • ${(currentInfluencerData.profile.followers_count || 0).toLocaleString()} подписчиков`;
+      if (coin && coin.sample_tweet_text) {
+        desc += ` • Цитата: "${coin.sample_tweet_text.slice(0, 90)}..."`;
+      }
+      document.getElementById('modalTargetDesc').innerText = desc;
+
+      const handle = currentInfluencerData.profile.screen_name;
+      document.getElementById('modalExternalLinks').innerHTML = `
+        <a href="https://x.com/${handle}" target="_blank" class="text-xs px-2.5 py-1 rounded bg-sky-500/10 hover:bg-sky-500/20 text-sky-400 border border-sky-500/20 flex items-center space-x-1 font-mono">
+          <span>𝕏 Открыть @${handle}</span> ↗
+        </a>
+      `;
+
+      document.getElementById('outreachModal').classList.remove('hidden');
+      await fetchAndRenderPitches();
+    }
+
+    async function openInfluencerPitchModalForTweet(tweetIdx) {
+      if (!currentInfluencerData) return alert('Сначала проанализируйте профиль инфлюенсера.');
+      const tweet = currentTweets[tweetIdx];
+      const tweetText = tweet ? tweet.text : '';
+
+      currentModalState.type = 'influencer';
+      currentModalState.coinSymbol = (tweet && tweet.cashtags && tweet.cashtags.length > 0) ? tweet.cashtags[0].replace('$', '') : null;
+      currentModalState.customTweetText = tweetText;
+      currentModalState.tokenAddress = null;
+
+      document.getElementById('modalTitle').innerText = `Outreach-питч для @${currentInfluencerData.profile.screen_name}`;
+      document.getElementById('modalSubtitle').innerText = 'Питч с персонализированной отсылкой к посту автора';
+      document.getElementById('modalTargetName').innerText = currentInfluencerData.profile.name || ('@' + currentInfluencerData.profile.screen_name);
+      document.getElementById('modalTargetBadge').innerText = '𝕏 Коллер';
+      document.getElementById('modalTargetAvatar').innerHTML = '📝';
+
+      document.getElementById('modalTargetDesc').innerText = `Отсылка к посту: "${tweetText.slice(0, 110)}..."`;
+
+      const handle = currentInfluencerData.profile.screen_name;
+      document.getElementById('modalExternalLinks').innerHTML = `
+        <a href="https://x.com/${handle}" target="_blank" class="text-xs px-2.5 py-1 rounded bg-sky-500/10 hover:bg-sky-500/20 text-sky-400 border border-sky-500/20 flex items-center space-x-1 font-mono">
+          <span>𝕏 Открыть @${handle}</span> ↗
+        </a>
+      `;
+
+      document.getElementById('outreachModal').classList.remove('hidden');
+      await fetchAndRenderPitches();
+    }
+
+    async function openDevPitchModal(tokenAddress) {
+      const coin = currentSimilarCoins.find(c => c.token_address === tokenAddress);
+      if (!coin) return alert('Проект не найден в результатах поиска.');
+
+      currentModalState.type = 'dev';
+      currentModalState.coinSymbol = coin.symbol;
+      currentModalState.customTweetText = null;
+      currentModalState.tokenAddress = tokenAddress;
+
+      document.getElementById('modalTitle').innerText = `Outreach девелоперам $${coin.symbol}`;
+      document.getElementById('modalSubtitle').innerText = `Предложение KOL-маркетинга от лица проверенных коллеров`;
+      document.getElementById('modalTargetName').innerText = `${coin.name || coin.symbol} ($${coin.symbol})`;
+      document.getElementById('modalTargetBadge').innerText = `${(coin.chain_id || '').toUpperCase()} Проект`;
+      document.getElementById('modalTargetAvatar').innerHTML = '💻';
+
+      let desc = `Капитализация: ${formatNumber(coin.fdv)} • Объем 24ч: ${formatNumber(coin.volume_24h)} • Ликвидность: ${formatNumber(coin.liquidity_usd)}`;
+      document.getElementById('modalTargetDesc').innerText = desc;
+
+      let linksHtml = '';
+      if (coin.twitter_url) {
+        linksHtml += `
+          <a href="${coin.twitter_url}" target="_blank" class="text-xs px-2.5 py-1 rounded bg-sky-500/10 hover:bg-sky-500/20 text-sky-400 border border-sky-500/20 flex items-center space-x-1 font-mono">
+            <span>𝕏 ${coin.twitter_handle ? '@' + coin.twitter_handle : 'Twitter'}</span> ↗
+          </a>
+        `;
+      }
+      if (coin.telegram_url) {
+        linksHtml += `
+          <a href="${coin.telegram_url}" target="_blank" class="text-xs px-2.5 py-1 rounded bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-400 border border-cyan-500/20 flex items-center space-x-1 font-mono">
+            <span>💬 Telegram</span> ↗
+          </a>
+        `;
+      }
+      if (!linksHtml) linksHtml = '<span class="text-xs text-slate-500">Соцсети не указаны</span>';
+      document.getElementById('modalExternalLinks').innerHTML = linksHtml;
+
+      document.getElementById('outreachModal').classList.remove('hidden');
+      await fetchAndRenderPitches();
+    }
+
+    async function fetchAndRenderPitches() {
+      const myProject = document.getElementById('modalMyProject').value.trim() || 'AlphaX Protocol';
+      const myChain = document.getElementById('modalMyChain').value;
+      const targetInf = currentInfluencerData ? currentInfluencerData.profile.screen_name : '';
+
+      let payload = {
+        target_type: currentModalState.type,
+        target_influencer: targetInf,
+        my_project_name: myProject,
+        my_chain: myChain
+      };
+
+      if (currentModalState.type === 'influencer') {
+        payload.coin_symbol = currentModalState.coinSymbol;
+        payload.custom_tweet_text = currentModalState.customTweetText;
+      } else if (currentModalState.type === 'dev') {
+        const coin = currentSimilarCoins.find(c => c.token_address === currentModalState.tokenAddress);
+        payload.candidate_project = coin;
+      }
+
+      document.getElementById('modalPitchText').value = 'Составление персонализированного питча...';
+      document.getElementById('modalTemplateTabs').innerHTML = '<span class="text-xs text-slate-500 animate-pulse">Генерация шаблонов...</span>';
+
+      try {
+        const res = await fetch('/api/generate-pitch', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        const json = await res.json();
+        if (!json.success) throw new Error(json.detail || 'Ошибка генерации');
+
+        currentModalState.pitches = json.pitches || {};
+        renderModalTabs(currentModalState.pitches);
+      } catch (e) {
+        document.getElementById('modalPitchText').value = 'Ошибка: ' + e.message;
+      }
+    }
+
+    function renderModalTabs(pitches) {
+      const tabsContainer = document.getElementById('modalTemplateTabs');
+      tabsContainer.innerHTML = '';
+
+      const tabLabels = {
+        'ru_collab_pitch': '🇷🇺 Питч на размещение (RU)',
+        'en_sponsored_call': '🇺🇸 Sponsored Call (EN)',
+        'en_alpha_share': '🇺🇸 Alpha Share (EN)',
+        'ru_dev_marketing': '🇷🇺 KOL Маркетинг (RU)',
+        'en_dev_marketing': '🇺🇸 KOL Shilling Offer (EN)'
+      };
+
+      const keys = Object.keys(pitches);
+      if (keys.length === 0) return;
+
+      currentModalState.activeTabKey = keys[0];
+
+      keys.forEach((k, idx) => {
+        const tabBtn = document.createElement('button');
+        tabBtn.className = `px-3 py-1.5 rounded-lg text-xs font-semibold transition ${
+          idx === 0
+            ? 'bg-brand-500/20 text-brand-400 border border-brand-500/30'
+            : 'text-slate-400 hover:text-white hover:bg-slate-800'
+        }`;
+        tabBtn.innerText = tabLabels[k] || k;
+        tabBtn.onclick = () => switchModalTemplate(k, tabBtn);
+        tabsContainer.appendChild(tabBtn);
+      });
+
+      setPitchText(pitches[keys[0]] || '');
+    }
+
+    function switchModalTemplate(key, tabBtn) {
+      currentModalState.activeTabKey = key;
+      const tabsContainer = document.getElementById('modalTemplateTabs');
+      Array.from(tabsContainer.children).forEach(btn => {
+        btn.className = 'px-3 py-1.5 rounded-lg text-xs font-semibold transition text-slate-400 hover:text-white hover:bg-slate-800';
+      });
+      tabBtn.className = 'px-3 py-1.5 rounded-lg text-xs font-semibold transition bg-brand-500/20 text-brand-400 border border-brand-500/30';
+
+      setPitchText(currentModalState.pitches[key] || '');
+    }
+
+    function setPitchText(text) {
+      const textarea = document.getElementById('modalPitchText');
+      textarea.value = text;
+      document.getElementById('modalCharCount').innerText = `${text.length} символов`;
+    }
+
+    document.getElementById('modalPitchText').addEventListener('input', (e) => {
+      document.getElementById('modalCharCount').innerText = `${e.target.value.length} символов`;
+    });
+
+    function regenerateCurrentModalPitch() {
+      fetchAndRenderPitches();
+    }
+
+    function closeOutreachModal() {
+      document.getElementById('outreachModal').classList.add('hidden');
+    }
+
+    function copyModalPitch() {
+      const text = document.getElementById('modalPitchText').value;
+      navigator.clipboard.writeText(text).then(() => {
+        const btn = document.getElementById('btnCopyPitch');
+        const icon = document.getElementById('copyPitchIcon');
+        const label = document.getElementById('copyPitchLabel');
+        icon.innerText = '✓';
+        label.innerText = 'Скопировано!';
+        btn.classList.remove('bg-brand-600', 'hover:bg-brand-500');
+        btn.classList.add('bg-emerald-600', 'hover:bg-emerald-500');
+
+        setTimeout(() => {
+          icon.innerText = '📋';
+          label.innerText = 'Копировать текст';
+          btn.classList.add('bg-brand-600', 'hover:bg-brand-500');
+          btn.classList.remove('bg-emerald-600', 'hover:bg-emerald-500');
+        }, 2000);
+      });
+    }
+
+    // Auto analyze default input on page load
+    window.addEventListener('DOMContentLoaded', () => {
+      analyzeInfluencer();
+    });
+  </script>
+
+  <!-- OUTREACH PITCH MODAL -->
+  <div id="outreachModal" onclick="if(event.target === this) closeOutreachModal()" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 hidden">
+    <div class="bg-slate-900 border border-slate-700 rounded-2xl w-full max-w-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+      <!-- Modal Header -->
+      <div class="px-6 py-4 border-b border-slate-800 flex items-center justify-between bg-slate-900/90">
+        <div class="flex items-center space-x-2.5">
+          <div class="w-8 h-8 rounded-lg bg-brand-500/20 text-brand-400 flex items-center justify-center font-bold">✉️</div>
+          <div>
+            <h3 class="text-base font-bold text-white" id="modalTitle">Генератор Outreach-сообщения</h3>
+            <p class="text-xs text-slate-400" id="modalSubtitle">Персонализированный питч на основе твитов и показателей</p>
+          </div>
+        </div>
+        <button onclick="closeOutreachModal()" class="text-slate-400 hover:text-white p-1 rounded-lg hover:bg-slate-800 transition text-lg">✕</button>
+      </div>
+
+      <!-- Modal Body (Scrollable) -->
+      <div class="p-6 space-y-4 overflow-y-auto">
+        <!-- Target Info Pill / Context -->
+        <div id="modalContextBox" class="p-3.5 rounded-xl bg-slate-800/60 border border-slate-700/60 flex items-start space-x-3">
+          <div id="modalTargetAvatar" class="text-2xl mt-0.5">🎯</div>
+          <div class="flex-1 min-w-0">
+            <div class="flex items-center space-x-2">
+              <span id="modalTargetName" class="font-bold text-white text-sm">Target</span>
+              <span id="modalTargetBadge" class="text-[11px] font-mono px-2 py-0.5 rounded bg-brand-500/20 text-brand-300 border border-brand-500/30">Коллер</span>
+            </div>
+            <p id="modalTargetDesc" class="text-xs text-slate-300 mt-1 italic font-sans break-words"></p>
+          </div>
+        </div>
+
+        <!-- Customizer Inputs -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 bg-slate-950/60 p-3.5 rounded-xl border border-slate-800">
+          <div>
+            <label class="block text-[11px] font-semibold uppercase tracking-wider text-slate-400 mb-1">Название вашего проекта</label>
+            <input type="text" id="modalMyProject" value="AlphaX Protocol" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-1.5 text-xs text-white focus:outline-none focus:border-brand-500 font-mono">
+          </div>
+          <div>
+            <label class="block text-[11px] font-semibold uppercase tracking-wider text-slate-400 mb-1">Сеть запуска</label>
+            <select id="modalMyChain" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-1.5 text-xs text-white focus:outline-none focus:border-brand-500">
+              <option value="Solana" selected>Solana</option>
+              <option value="Base">Base</option>
+              <option value="Ethereum">Ethereum</option>
+              <option value="Robinhood">Robinhood Chain</option>
+              <option value="BSC">BSC (BNB Chain)</option>
+            </select>
+          </div>
+          <div class="sm:col-span-2 flex justify-end">
+            <button onclick="regenerateCurrentModalPitch()" class="text-xs px-3 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-brand-400 border border-slate-700 transition flex items-center space-x-1 font-medium">
+              <span>🔄 Перегенерировать текст</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Template Tabs -->
+        <div>
+          <div class="flex flex-wrap gap-2 border-b border-slate-800 pb-2" id="modalTemplateTabs">
+            <!-- Tabs injected dynamically via JS -->
+          </div>
+        </div>
+
+        <!-- Pitch Textarea -->
+        <div>
+          <div class="flex items-center justify-between mb-1.5">
+            <label class="text-xs font-semibold text-slate-400">Готовый текст питча (можно редактировать вручную):</label>
+            <span class="text-[11px] text-slate-500 font-mono" id="modalCharCount">0 символов</span>
+          </div>
+          <textarea id="modalPitchText" rows="7" class="w-full bg-slate-950 border border-slate-700 focus:border-brand-500 rounded-xl p-3.5 text-xs font-mono text-slate-200 focus:outline-none leading-relaxed resize-y"></textarea>
+        </div>
+      </div>
+
+      <!-- Modal Footer -->
+      <div class="px-6 py-4 border-t border-slate-800 bg-slate-900/90 flex flex-wrap items-center justify-between gap-3">
+        <div class="flex items-center space-x-2" id="modalExternalLinks">
+          <!-- Links to Twitter DM / Telegram injected via JS -->
+        </div>
+        <div class="flex items-center space-x-2">
+          <button onclick="closeOutreachModal()" class="px-3.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-medium text-slate-300 border border-slate-700 transition">
+            Закрыть
+          </button>
+          <button id="btnCopyPitch" onclick="copyModalPitch()" class="px-4 py-1.5 rounded-xl bg-brand-600 hover:bg-brand-500 text-xs font-bold text-white transition flex items-center space-x-1.5 shadow-lg shadow-brand-500/20">
+            <span id="copyPitchIcon">📋</span>
+            <span id="copyPitchLabel">Копировать текст</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
